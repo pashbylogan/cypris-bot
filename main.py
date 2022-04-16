@@ -104,6 +104,7 @@ def _create_csvs(channel, query, secondaries, email):
     """
     # Create a new bot object
     bot = Bot(channel, query, secondaries, email)
+    print(query, secondaries)
 
     # Research and news pandas dataframes
     research = bot.combine_papers()
