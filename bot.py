@@ -1,4 +1,4 @@
-import time, csv, requests, aylien_news_api, pygsheets, os
+import time, csv, requests, aylien_news_api, pygsheets, os, re
 import pandas as pd
 from datetime import datetime
 from aylien_news_api.rest import ApiException
@@ -341,17 +341,25 @@ class Bot:
                                             removeParents=previous_parents,
                                             fields='id, parents').execute()
 
+    def _check_email(self, email):
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        if(re.fullmatch(regex, email)):
+            return True
+        else:
+            return False
+
     def _share_folder(self, folder_id, service):
-        permission = {
-            'type': 'user',
-            'role': 'writer',
-            'emailAddress': self.email_to_share
-        }
-        service.permissions().create(
-            fileId = folder_id,
-            body=permission,
-            fields='id'
-        ).execute()
+        if self._check_email(self.email_to_share):
+            permission = {
+                'type': 'user',
+                'role': 'writer',
+                'emailAddress': self.email_to_share
+            }
+            service.permissions().create(
+                fileId = folder_id,
+                body=permission,
+                fields='id'
+            ).execute()
 
     def _create_folder(self, service):
         file_metadata = {
@@ -362,7 +370,7 @@ class Bot:
         folder = service.files().create(body=file_metadata,
                                     fields='id').execute()
 
-        return folder
+        return folder.get('id')
 
     def to_google(self, news_df, research_df):
         scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -374,7 +382,7 @@ class Bot:
         spreadsheet_service = build('sheets', 'v4', credentials=creds)
         pyg = pygsheets.authorize(custom_credentials=creds)
 
-        folder = self._create_folder(service)
+        folder_id = self._create_folder(service)
 
         links = []
         for item in [("research", research_df), ("news", news_df)]:
@@ -386,8 +394,8 @@ class Bot:
             worksheet = pyg.open_by_key(spread_id)[0]
             worksheet.set_dataframe(item[1], (0,0))
 
-            self._move_file(folder.get('id'), spread_id, service)
+            self._move_file(folder_id, spread_id, service)
 
-        self._share_folder(folder.get('id'), service)
+        self._share_folder(folder_id, service)
 
         return links
