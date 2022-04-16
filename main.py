@@ -32,7 +32,7 @@ def _send_modal(trigger_id):
 	    		},
 	    		"label": {
 	    			"type": "plain_text",
-	    			"text": "Title"
+	    			"text": "Query"
 	    		}
 	    	},
 	    	{

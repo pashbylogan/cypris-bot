@@ -343,7 +343,7 @@ class Bot:
 
     def _check_email(self, email):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        if(re.fullmatch(regex, email)):
+        if(re.fullmatch(regex, str(email))):
             return True
         else:
             return False
