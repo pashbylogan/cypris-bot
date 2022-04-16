@@ -113,7 +113,7 @@ class Bot:
         # "isOpenAccess",
         # "fieldsOfStudy",
         "authors"
-    ]
+    ] # The full list is here. Uncommenting fields will break the combine_papers function
 
     paper_limit = os.environ['PAPER_LIMIT']
     parent_id = os.environ['PARENT_FOLDER_ID']
@@ -129,16 +129,16 @@ class Bot:
     # Defining host is optional and default to https://api.aylien.com/news
     configuration.host = os.environ['AYLIEN_HOST']
 
-    # The constructor for the class. It takes the channel name as the a
-    # parameter and sets it as an instance variable.
     def __init__(self, channel, query, secondaries, email):
         self.channel = channel
         self.query = query
         self.secondary_keywords = secondaries
         self.email_to_share = email
 
-    # Craft and return the entire message payload as a dictionary.
     def get_message_payload(self, research_link, news_link):
+        """Compose a message with the links to the google sheets that include the query results.
+        Slack has a slightly different markdown formatter so note the link structure.
+        """
         message = {
             "type": "section",
             "text": {
@@ -157,6 +157,8 @@ class Bot:
         }
 
     def _semantic_query (self, q):
+        """Query semantic scholar.
+        """
         params = {
             'query': q,
             'fields': ",".join(self.semantic_field_list),
@@ -169,6 +171,8 @@ class Bot:
         return response.json()['data']
     
     def _core_query (self, q):
+        """Query core API.
+        """
         params = {
             'q': q,
             'exclude': 'fullText',
@@ -181,12 +185,18 @@ class Bot:
         return response.json()['results']
     
     def _if_space (self, word):
+        """When a query word as a space, we want to treat that as a phrase.
+        NOTE - Currently not in use
+        """
         if " " in word:
             return f'((title: "{word}") OR (abstraction: "{word}"))'
         else:
             return f'((title: {word}) OR (abstraction: {word}))'
     
     def _format_core_query (self, query, secondary_keywords):
+        """The CORE query structure as seen in the backend code from the India team.
+        NOTE - Currently not in use
+        """
         q = query[1:len(query)-1] if query[0] == '(' and query[len(query)-1] == ')' else query
         
         andArr = []
@@ -211,6 +221,9 @@ class Bot:
         return q
     
     def _format_generic_query (self, query, secondary_keywords):
+        """This adds secondary keywords to the original query.
+        NOTE - Currently not in use
+        """
         q = query[1:len(query)-1] if query[0] == '(' and query[len(query)-1] == ')' else query
         
         temp_array = []
@@ -232,6 +245,10 @@ class Bot:
         return q
     
     def combine_papers (self):
+        """Combine research paper API results into pandas dataframes and concatenate.
+        Also, find which secondary keywords show up in the title and abstract.
+        """
+
         # Parse semantic results
         semantic_pull = pd.json_normalize(self._semantic_query(self._replace_ands_ors(self.query)))
         semantic_pull = semantic_pull.drop(['paperId'], axis = 1)
@@ -264,6 +281,8 @@ class Bot:
         return no_duplicates
 
     def _get_search_opts(self, query, category, days_behind=90, aql=True, per_page=25):
+        """Helper function for the get_news function. Creates the payload for the Aylien API.
+        """
         data = {
             'language': ['en'],
             'published_at_end': 'NOW',
@@ -283,10 +302,12 @@ class Bot:
         return data
 
     def get_news (self):
+        """Query Aylien API for news and collect into pandas dataframe.
+        """
+
         # Create an instance of the API class
         api_instance = aylien_news_api.DefaultApi(aylien_news_api.ApiClient(self.configuration))
 
-        d = set()
         collected_data  = {
             'category': [],
             'title': [],
@@ -305,31 +326,28 @@ class Bot:
                     if len(story.source.locations) > 0:
                         country = story.source.locations[0].country
                     else:
-                        country = 'DNE'
+                        country = ''
 
-                    # Remove duplicates
-                    if len(d) == 0:
-                        d.add(story.title)
-                    else:
-                        match = False
-                        for k in d:
-                            if (story.title in d) or (k in story.title) or (story.title in k):
-                                match = True
-                        if not match:
-                            d.add(story.title)
-                            collected_data['category'].append(key)
-                            collected_data['title'].append(story.title)
-                            collected_data['source'].append(story.source.name)
-                            collected_data['country'].append(country)
-                            collected_data['links'].append(story.links.permalink)
+                    collected_data['category'].append(key)
+                    collected_data['title'].append(story.title)
+                    collected_data['source'].append(story.source.name)
+                    collected_data['country'].append(country)
+                    collected_data['links'].append(story.links.permalink)
 
             except ApiException as e:
                 print("Exception when calling DefaultApi->list_stories: %s\n" % e)
             time.sleep(1)
 
-        return pd.DataFrame.from_dict(collected_data)
+        news_df = pd.DataFrame.from_dict(collected_data)
+        noDuplicates = news_df[~news_df.duplicated(subset='title', keep='first')]
+        noDuplicates = noDuplicates.reset_index()
+        noDuplicates = noDuplicates.drop(['index'], axis=1)
+
+        return noDuplicates
 
     def _create_spreadsheet(self, title, service):
+        """Utilize Google drive API to create a new google sheet.
+        """
         spreadsheet_data = {
             'properties': {'title': title}
         }
@@ -338,6 +356,8 @@ class Bot:
                                             fields='spreadsheetId').execute()
 
     def _move_file(self, folder_id, file_id, drive_service):
+        """Utilize Google drive API to move file into the folder specified by the environment var PARENT_FOLDER_ID.
+        """
         # Retrieve the existing parents to remove
         file = drive_service.files().get(fileId=file_id,
                                          fields='parents').execute()
@@ -349,6 +369,8 @@ class Bot:
                                             fields='id, parents').execute()
 
     def _check_email(self, email):
+        """Helper function for making sure email is valid before trying to share. 
+        """
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         if(re.fullmatch(regex, str(email))):
             return True
@@ -356,6 +378,8 @@ class Bot:
             return False
 
     def _share_folder(self, folder_id, service):
+        """Share folder with user entered username (from slack modal).
+        """
         if self._check_email(self.email_to_share):
             permission = {
                 'type': 'user',
@@ -369,6 +393,8 @@ class Bot:
             ).execute()
 
     def _create_folder(self, service):
+        """Create a new folder to put the research and news files in.
+        """
         file_metadata = {
             'name': datetime.now().strftime("%m/%d/%Y") + " | " + self.query,
             'mimeType': 'application/vnd.google-apps.folder',
@@ -380,6 +406,8 @@ class Bot:
         return folder.get('id')
 
     def to_google(self, news_df, research_df):
+        """Move data into google sheets and organize in folders correctly.
+        """
         scope = ['https://www.googleapis.com/auth/spreadsheets',
          'https://www.googleapis.com/auth/drive']
 
@@ -391,6 +419,7 @@ class Bot:
 
         folder_id = self._create_folder(service)
 
+        # Create two spreadsheets. One for research and the other for news
         links = []
         for item in [("research", research_df), ("news", news_df)]:
             spreadsheet = self._create_spreadsheet(item[0], spreadsheet_service)

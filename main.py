@@ -10,6 +10,8 @@ app = Flask(__name__)
 slack_web_client = WebClient(token=os.environ.get("SLACK_TOKEN"))
 
 def _send_modal(trigger_id):
+    """Create a menu for the user to input structured data. Send it via the Slack API
+    """
     message = {
 	    "title": {
 	    	"type": "plain_text",
@@ -96,6 +98,8 @@ def _send_modal(trigger_id):
     slack_web_client.views_open(trigger_id=trigger_id, view=message)
 
 def _send_processing_message(channel, query):
+    """Let the user know we are computing results and include query for future reference.
+    """
     # Post the onboarding message in Slack
     slack_web_client.chat_postMessage(channel=channel, text="Processing the following query: " + query)
 
