@@ -144,7 +144,7 @@ def interact():
             return make_response("", 200)
         except SlackApiError as e:
             code = e.response["error"]
-            return make_response(f"Failed to open a modal due to {code}", 200)
+            return make_response(f'Failed to open a modal due to {code}', 200)
 
     if "payload" in request.form:
         payload = json.loads(request.form['payload'])
