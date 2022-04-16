@@ -134,7 +134,7 @@ def _create_csvs(channel, query, secondaries, email):
 
 @app.route('/slack/events', methods=['GET', 'POST'])
 def testing():
-    return make_response("", 200)
+    return _send_error_message('general')
 
 @app.route('/slack/interact', methods=['POST'])
 def interact():
