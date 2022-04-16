@@ -132,6 +132,10 @@ def _create_csvs(channel, query, secondaries, email):
     # Send user the relevant links
     slack_web_client.chat_postMessage(**bot.get_message_payload(*links))
 
+@app.route('/slack/events', methods=['GET', 'POST'])
+def testing():
+    return make_response("", 200)
+
 @app.route('/slack/interact', methods=['POST'])
 def interact():
     """Parse the event, and if /query was used send a modal.
