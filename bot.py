@@ -383,7 +383,7 @@ class Bot:
 
             worksheet.set_dataframe(item[1], (0,0))
 
-            self._move_file(folder.get('id'), spreadhsheet.get('spreadsheetId'), service)
+            self._move_file(folder.get('id'), spreadsheet.get('spreadsheetId'), service)
 
         self._share_folder(folder.get('id'), service)
 
