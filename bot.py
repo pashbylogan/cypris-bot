@@ -377,13 +377,14 @@ class Bot:
         links = []
         for item in [("research", research_df), ("news", news_df)]:
             spreadsheet = self._create_spreadsheet(item[0], spreadsheet_service)
-            links.append(spreadsheet.get('spreadsheetId'))
+            spread_id = spreadsheet.get('spreadsheetId')
 
-            worksheet = pyg.open_by_key(spreadsheet.get('spreadsheetId'))[0]
+            links.append(spread_id)
 
+            worksheet = pyg.open_by_key(spread_id)[0]
             worksheet.set_dataframe(item[1], (0,0))
 
-            self._move_file(folder.get('id'), spreadsheet.get('spreadsheetId'), service)
+            self._move_file(folder.get('id'), spread_id, service)
 
         self._share_folder(folder.get('id'), service)
 
