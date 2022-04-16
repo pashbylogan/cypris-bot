@@ -1,1 +1,2 @@
-pygsheets
+pygsheets==2.0.5
+aylien-news-api==5.1.0
