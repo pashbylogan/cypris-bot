@@ -370,7 +370,7 @@ class Bot:
         creds = Credentials.from_authorized_user_file('google-credentials.json', scope)
         service = build('drive', 'v3', credentials=creds)
         spreadsheet_service = build('sheets', 'v4', credentials=creds)
-        pyg = pygsheets.authorize(client_secret='google-credentials.json')
+        pyg = pygsheets.authorize(custom_credentials=creds)
 
         folder = _create_folder(service)
 
