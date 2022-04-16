@@ -1,7 +1,7 @@
 import os, json, threading
 from flask import Flask, request, make_response
 from slack import WebClient
-from app import Bot
+from bot import Bot
 
 # Initialize a Flask app to host the events adapter
 app = Flask(__name__)
