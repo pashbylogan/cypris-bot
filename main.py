@@ -95,23 +95,6 @@ def _send_modal(trigger_id):
 
     slack_web_client.views_open(trigger_id=trigger_id, view=message)
 
-def _send_error_message(channel):
-    message = {
-        "channel": channel,
-        "blocks": [
-            {
-		        "type": "section",
-		        "text": {
-		        	"type": "mrkdwn",
-		        	"text": "Hmm, something went wrong. Please try again by mentioning my name."
-		        }
-		    }
-        ]
-    }
-
-    # Post the onboarding message in Slack
-    slack_web_client.chat_postMessage(**message)
-
 def _send_processing_message(channel):
     # Post the onboarding message in Slack
     slack_web_client.chat_postMessage(channel=channel, text="Processing...")
@@ -131,10 +114,6 @@ def _create_csvs(channel, query, secondaries, email):
 
     # Send user the relevant links
     slack_web_client.chat_postMessage(**bot.get_message_payload(*links))
-
-@app.route('/slack/events', methods=['GET', 'POST'])
-def testing():
-    return _send_error_message('general')
 
 @app.route('/slack/interact', methods=['POST'])
 def interact():
@@ -180,11 +159,4 @@ def interact():
             return make_response("", 200)
 
     # If we make it here, an error occured
-    return make_response("", 404)
-
-'''
-if __name__ == "__main__":
-    # Run your app on your externally facing IP address on port 3000 instead of
-    # running it on localhost, which is traditional for development.
-    app.run(host='0.0.0.0', port=3000)
-'''
+    return make_response("", 500)
