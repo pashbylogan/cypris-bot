@@ -182,7 +182,9 @@ def interact():
     # If we make it here, an error occured
     return make_response("", 404)
 
+'''
 if __name__ == "__main__":
     # Run your app on your externally facing IP address on port 3000 instead of
     # running it on localhost, which is traditional for development.
     app.run(host='0.0.0.0', port=3000)
+'''
