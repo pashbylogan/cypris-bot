@@ -372,20 +372,19 @@ class Bot:
         spreadsheet_service = build('sheets', 'v4', credentials=creds)
         pyg = pygsheets.authorize(custom_credentials=creds)
 
-        folder = _create_folder(service)
+        folder = self._create_folder(service)
 
-        news_spreadsheet = self._create_spreadsheet("news", spreadsheet_service)
-        research_spreadsheet = self._create_spreadsheet("research", spreadsheet_service)
+        links = []
+        for item in [("research", research_df), ("news", news_df)]:
+            spreadsheet = self._create_spreadsheet(item[0], spreadsheet_service)
+            links.append(spreadsheet.get('spreadsheetId'))
 
-        research_worksheet = pyg.open_by_key(research_spreadsheet.get('spreadsheetId'))[0]
-        news_worksheet = pyg.open_by_key(news_spreadsheet.get('spreadsheetId'))[0]
+            worksheet = pyg.open_by_key(spreadsheet.get('spreadsheetId'))[0]
 
-        research_worksheet.set_dataframe(research_df, (0,0))
-        news_worksheet.set_dataframe(news_df, (0,0))
+            worksheet.set_dataframe(item[1], (0,0))
 
-        self._move_file(folder.get('id'), news_spreadsheet.get('spreadsheetId'), service)
-        self._move_file(folder.get('id'), research_spreadsheet.get('spreadsheetId'), service)
+            self._move_file(folder.get('id'), spreadhsheet.get('spreadsheetId'), service)
 
         self._share_folder(folder.get('id'), service)
 
-        return [research_spreadsheet.get('spreadsheetId'), news_spreadsheet.get('spreadsheetId')]
+        return links
