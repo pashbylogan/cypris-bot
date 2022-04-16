@@ -16,3 +16,4 @@ python=3.9.12=h12debd9_0
 setuptools=61.2.0=py39h06a4308_0
 slackclient=2.9.3=pyhd8ed1ab_1
 werkzeug=2.0.3=pyhd3eb1b0_0
+--ignore-installed six
