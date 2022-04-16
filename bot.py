@@ -223,15 +223,22 @@ class Bot:
         q += " AND (" + " OR ".join(temp_array) + ")"
         q = f'({q})'
         return q
+
+    def _replace_ands_ors(self, q):
+        for s in ['or', 'Or', 'oR']:
+            q = q.replace(s, 'OR')
+        for s in ['and', 'And', 'aNd', 'anD', 'ANd', 'aND']:
+            q = q.replace(s, 'AND')
+        return q
     
     def combine_papers (self):
         # Parse semantic results
-        semantic_pull = pd.json_normalize(self._semantic_query(self.query))
+        semantic_pull = pd.json_normalize(self._semantic_query(self._replace_ands_ors(self.query)))
         semantic_pull = semantic_pull.drop(['paperId'], axis = 1)
         semantic_pull['authors'] = semantic_pull['authors'].map(lambda x: [i['name'] for i in x])
         
         # Parse core results
-        core_pull = pd.json_normalize(self._core_query(self.query))
+        core_pull = pd.json_normalize(self._core_query(self._replace_ands_ors(self.query)))
         core_pull_filtered = core_pull[self.core_field_list].copy()
         core_pull_filtered['authors'] = core_pull_filtered['authors'].map(lambda x: [i['name'] for i in x])
         core_pull_filtered.rename(columns={'downloadUrl': 'url', 'yearPublished': 'year'}, inplace=True)

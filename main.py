@@ -95,16 +95,15 @@ def _send_modal(trigger_id):
 
     slack_web_client.views_open(trigger_id=trigger_id, view=message)
 
-def _send_processing_message(channel):
+def _send_processing_message(channel, query):
     # Post the onboarding message in Slack
-    slack_web_client.chat_postMessage(channel=channel, text="Processing...")
+    slack_web_client.chat_postMessage(channel=channel, text="Processing the following query: " + query)
 
 def _create_csvs(channel, query, secondaries, email):
     """Craft the bot, get the API results, and send data to google
     """
     # Create a new bot object
     bot = Bot(channel, query, secondaries, email)
-    print(query, secondaries)
 
     # Research and news pandas dataframes
     research = bot.combine_papers()
@@ -150,7 +149,7 @@ def interact():
                     email = obj['email']['value'].split(',')
 
             # Simple message "Processing..." just to assure the user the task is working
-            _send_processing_message(channel_id)
+            _send_processing_message(channel_id, query)
 
             # Need to start a thread because the modal needs to know asap if it successfully reached the endpoint
             thread = threading.Thread(target=_create_csvs, args=(channel_id, query, secondary_keywords, email))
