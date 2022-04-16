@@ -362,6 +362,8 @@ class Bot:
         folder = service.files().create(body=file_metadata,
                                     fields='id').execute()
 
+        return folder
+
     def to_google(self, news_df, research_df):
         scope = ['https://www.googleapis.com/auth/spreadsheets',
          'https://www.googleapis.com/auth/drive']
