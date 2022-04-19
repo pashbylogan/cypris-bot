@@ -58,24 +58,6 @@ def _send_modal(trigger_id):
 	    	{
 	    		"type": "divider"
 	    	},
-	    	{
-	    		"type": "input",
-	    		"element": {
-	    			"type": "plain_text_input",
-	    			"action_id": "email",
-	    			"placeholder": {
-	    				"type": "plain_text",
-	    				"text": "Enter the email you'd like these files shared with"
-	    			}
-	    		},
-	    		"label": {
-	    			"type": "plain_text",
-	    			"text": "Email"
-	    		}
-	    	},
-	    	{
-	    		"type": "divider"
-	    	},
             {
                 "block_id": "my_block_id",
                 "type": "input",

@@ -133,7 +133,6 @@ class Bot:
         self.channel = channel
         self.query = query
         self.secondary_keywords = secondaries
-        self.email_to_share = email
 
     def get_message_payload(self, research_link, news_link):
         """Compose a message with the links to the google sheets that include the query results.
@@ -382,9 +381,8 @@ class Bot:
         """
         if self._check_email(self.email_to_share):
             permission = {
-                'type': 'user',
+                'type': 'anyone',
                 'role': 'writer',
-                'emailAddress': self.email_to_share
             }
             service.permissions().create(
                 fileId = folder_id,
