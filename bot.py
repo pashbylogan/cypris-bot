@@ -129,7 +129,7 @@ class Bot:
     # Defining host is optional and default to https://api.aylien.com/news
     configuration.host = os.environ['AYLIEN_HOST']
 
-    def __init__(self, channel, query, secondaries, email):
+    def __init__(self, channel, query, secondaries):
         self.channel = channel
         self.query = query
         self.secondary_keywords = secondaries
@@ -367,28 +367,18 @@ class Bot:
                                             removeParents=previous_parents,
                                             fields='id, parents').execute()
 
-    def _check_email(self, email):
-        """Helper function for making sure email is valid before trying to share. 
-        """
-        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        if(re.fullmatch(regex, str(email))):
-            return True
-        else:
-            return False
-
     def _share_folder(self, folder_id, service):
         """Share folder with user entered username (from slack modal).
         """
-        if self._check_email(self.email_to_share):
-            permission = {
-                'type': 'anyone',
-                'role': 'writer',
-            }
-            service.permissions().create(
-                fileId = folder_id,
-                body=permission,
-                fields='id'
-            ).execute()
+        permission = {
+            'type': 'anyone',
+            'role': 'writer',
+        }
+        service.permissions().create(
+            fileId = folder_id,
+            body=permission,
+            fields='id'
+        ).execute()
 
     def _create_folder(self, service):
         """Create a new folder to put the research and news files in.
