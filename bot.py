@@ -15,16 +15,14 @@ class Bot:
             ],
         'Acquisition': [
             'ay.biz.manda',
-            'ay.fin.spac'
-            ],
+            'ay.fin.spac' ],
         'Funding': [
             'ay.fin.corpfund',
             'ay.fin.private',
             'ay.fin.grants',
             'ay.fin.persinv',
             'ay.fin.pefund',
-            'ay.biz.majann'
-            ],
+            'ay.biz.majann' ],
         'IPO': [
             'ay.fin.offering',
             'ay.pol.govpriv',
@@ -115,7 +113,28 @@ class Bot:
         "authors"
     ] # The full list is here. Uncommenting fields will break the combine_papers function
 
+    cypris_url = os.environ['CYPRIS_URL']
+    patent_field_list = [
+        'patentNumber',
+        'assignee',
+        'inventor',
+        'categoryId',
+        'classificationText',
+        'abstraction',
+        'title',
+        'publicationDate',
+        'rank',
+        'bundleId',
+        'documentType',
+        'claims',
+        'matched_queries',
+        'applicationType',
+        'country',
+        'kind',
+    ]
+
     paper_limit = os.environ['PAPER_LIMIT']
+    patent_limit = os.environ['PATENT_LIMIT']
     parent_id = os.environ['PARENT_FOLDER_ID']
 
     configuration = aylien_news_api.Configuration()
@@ -154,6 +173,8 @@ class Bot:
                 message,
             ],
         }
+
+    ''' PAPER METHODS '''
 
     def _semantic_query (self, q):
         """Query semantic scholar.
@@ -279,6 +300,8 @@ class Bot:
             
         return no_duplicates
 
+    ''' NEWS METHODS '''
+
     def _get_search_opts(self, query, category, days_behind=90, aql=True, per_page=25):
         """Helper function for the get_news function. Creates the payload for the Aylien API.
         """
@@ -343,6 +366,42 @@ class Bot:
         noDuplicates = noDuplicates.drop(['index'], axis=1)
 
         return noDuplicates
+
+    ''' PATENT METHODS '''
+
+    def _patent_query(self, q):
+        def util(q):
+            q = q.split(' AND ')
+            for i, item in enumerate(q):
+                item = item.replace('(', '')
+                item = item.replace(')', '')
+                item = item.replace('-', ' ')
+                q[i] = item
+            return q
+
+        params = {
+            "similarMatch":False,
+            "patentTypes":["UTILITY","DESIGN","PLANT"],
+            "patentApplicationTypes":["UTILITY","DESIGN","PLANT"],
+            "classificationIds":[],
+            "listingStatus":[],
+            "listingTypes":[],
+            "onlyBundles":False,
+            "reportId":"db9e8f71-597c-4b37-a908-93d784342afb",
+            "primaryKeywords":util(q),
+            "secondaryKeywords":[],
+            "mustNotKeywords":[],
+            "type":"TECHNOLOGIES",
+            "cbType":"",
+            "sortBy":"revenue",
+            "exactMatch":False,
+            "sorted":False
+        }
+        response = requests.post("".join([self.cypris_url, '?resultSize=', str(self.patent_limit), '&offSet=0']), json=params)
+        return response.json()['patents']
+        
+
+    ''' GOOGLE METHODS '''
 
     def _create_spreadsheet(self, title, service):
         """Utilize Google drive API to create a new google sheet.
