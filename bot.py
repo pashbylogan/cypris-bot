@@ -4,6 +4,7 @@ from datetime import datetime
 from aylien_news_api.rest import ApiException
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
+from oauth2client.service_account import ServiceAccountCredentials
 
 class Bot:
     ''' PARAMS '''
@@ -459,7 +460,7 @@ class Bot:
          'https://www.googleapis.com/auth/drive']
 
         # Authorize all relevant credentials
-        creds = Credentials.from_authorized_user_file('google-credentials.json', scope)
+        creds = ServiceAccountCredentials.from_json_keyfile('google-credentials.json', scopes=scope)
         service = build('drive', 'v3', credentials=creds)
         spreadsheet_service = build('sheets', 'v4', credentials=creds)
         pyg = pygsheets.authorize(custom_credentials=creds)
