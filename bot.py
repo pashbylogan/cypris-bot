@@ -1,10 +1,10 @@
-import time, csv, requests, aylien_news_api, pygsheets, os, re
+import time, csv, requests, aylien_news_api, pygsheets, os, re, json
 import pandas as pd
 from datetime import datetime
 from aylien_news_api.rest import ApiException
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2 import service_account
 
 class Bot:
     ''' PARAMS '''
@@ -460,7 +460,7 @@ class Bot:
          'https://www.googleapis.com/auth/drive']
 
         # Authorize all relevant credentials
-        creds = ServiceAccountCredentials.from_json_keyfile('google-credentials.json', scopes=scope)
+        creds = service_account.Credentials.from_service_account_info(json.loads('google-credentials.json'), scopes=scope)
         service = build('drive', 'v3', credentials=creds)
         spreadsheet_service = build('sheets', 'v4', credentials=creds)
         pyg = pygsheets.authorize(custom_credentials=creds)
