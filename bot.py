@@ -1,4 +1,4 @@
-import time, csv, requests, aylien_news_api, pygsheets, os, re
+import time, csv, requests, aylien_news_api, pygsheets, os, re, pycountry
 import pandas as pd
 from datetime import datetime
 from aylien_news_api.rest import ApiException
@@ -116,22 +116,14 @@ class Bot:
 
     cypris_url = os.environ['CYPRIS_URL']
     patent_field_list = [
-        'patentNumber',
-        'assignee',
-        'inventor',
-        'categoryId',
-        'classificationText',
-        'abstraction',
-        'title',
-        'publicationDate',
-        'rank',
-        'bundleId',
-        'documentType',
-        'claims',
-        'matched_queries',
-        'applicationType',
         'country',
-        'kind',
+        'patentNumber',
+        'publicationDate',
+        'inventor',
+        'assignee',
+        'title',
+        'abstraction',
+        'documentType'
     ]
 
     paper_limit = os.environ['PAPER_LIMIT']
@@ -154,7 +146,7 @@ class Bot:
         self.query = query
         self.secondary_keywords = secondaries
 
-    def get_message_payload(self, research_link, news_link):
+    def get_message_payload(self, research_link, news_link, patent_link):
         """Compose a message with the links to the google sheets that include the query results.
         Slack has a slightly different markdown formatter so note the link structure.
         """
@@ -165,6 +157,7 @@ class Bot:
                 "text": (
                     '• :chart_with_upwards_trend: <https://docs.google.com/spreadsheets/d/'+research_link+'|research>\n'+
                     '• :newspaper: <https://docs.google.com/spreadsheets/d/'+news_link+'|news>'
+                    '• :closed_lock_with_key: <https://docs.google.com/spreadsheets/d/'+patent_link+'|patents>'
                 ),
             },
         }
@@ -371,6 +364,9 @@ class Bot:
     ''' PATENT METHODS '''
 
     def _patent_query(self, q):
+        """ Create an API request for cypris' dev database
+        """
+
         def util(q):
             q = q.split(' AND ')
             for i, item in enumerate(q):
@@ -401,6 +397,54 @@ class Bot:
         response = requests.post("".join([self.cypris_url, '?resultSize=', str(self.patent_limit), '&offSet=0']), json=params)
         return response.json()['patents']
         
+    def get_patents(self):
+        """ Pull patents from cypris dev and turn them into pandas dataframe
+        """
+
+        # Parse patent results
+        patent_df = pd.json_normalize(_patent_query(self.query))
+
+        # Remove all columns in the set difference
+        patent_df = patent_df.drop(list(set(patent_df.columns) - set(self.patent_field_list)) + list(set(self.patent_field_list) - set(patent_df.columns)), axis=1)
+
+        # Rename columns to make more readible
+        patent_df = patent_df.rename(columns={
+            'country': 'Country Name',
+            'patentNumber': 'Publication',
+            'publicationDate': 'Publication Date',
+            'assignee': 'Applicant',
+            'abstraction': 'Abstract',
+            'title': 'Title',
+            'inventor': 'Inventor',
+            'documentType': 'Is granted'
+        })
+        
+        # Generate links
+        link_row = []
+        link = 'https://worldwide.espacenet.com/patent/search/publication/'
+        for idx, row in patent_df.iterrows():
+            link_row.append(f'{link}{row.Publication}')
+        patent_df['url'] = link_row
+        
+        # Clean up data
+        patent_df['Country Name'] = patent_df['Country Name'].map(lambda x: (pycountry.countries.get(alpha_2=x).name if pycountry.countries.get(alpha_2=x) != None else ''))
+        patent_df['Inventor'] = patent_df['Inventor'].map(lambda x: '\n'.join(x))
+        patent_df['Applicant'] = patent_df['Applicant'].map(lambda x: '\n'.join(x))
+        patent_df['Is granted'] = patent_df['Is granted'].map(lambda x: 'YES' if not x else 'NO')
+        
+        # Find secondary keywords
+        secondary_array = []
+        for index, row in patent_df.iterrows():
+            temp = []
+            for word in self.secondary_keywords:
+                title = '' if not row['Title'] else row['Title'].lower()
+                abstract = '' if not row['Abstract'] else row['Abstract'].lower()
+                if word.lower() in title or word.lower() in abstract:
+                    temp.append(word.lower())
+            secondary_array.append(temp)
+        patent_df['secondary'] = secondary_array
+
+        return patent_df
 
     ''' GOOGLE METHODS '''
 
@@ -453,7 +497,7 @@ class Bot:
 
         return folder.get('id')
 
-    def to_google(self, news_df, research_df):
+    def to_google(self, news_df, research_df, patent_df):
         """Move data into google sheets and organize in folders correctly.
         """
         scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -467,9 +511,9 @@ class Bot:
 
         folder_id = self._create_folder(service)
 
-        # Create two spreadsheets. One for research and the other for news
+        # Create three spreadsheets. One for research, news, and patents
         links = []
-        for item in [("research", research_df), ("news", news_df)]:
+        for item in [("research", research_df), ("news", news_df), ('patents', patent_df)]:
             spreadsheet = self._create_spreadsheet(item[0], spreadsheet_service)
             spread_id = spreadsheet.get('spreadsheetId')
 

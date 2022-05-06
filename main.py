@@ -95,9 +95,10 @@ def _create_csvs(channel, query, secondaries):
     # Research and news pandas dataframes
     research = bot.combine_papers()
     news = bot.get_news()
+    patents = bot.get_patents()
 
     # Array of IDs for each file
-    links = bot.to_google(news, research)
+    links = bot.to_google(news, research, patents)
 
     # Send user the relevant links
     slack_web_client.chat_postMessage(**bot.get_message_payload(*links))
