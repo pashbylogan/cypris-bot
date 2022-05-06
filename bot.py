@@ -402,7 +402,7 @@ class Bot:
         """
 
         # Parse patent results
-        patent_df = pd.json_normalize(_patent_query(self.query))
+        patent_df = pd.json_normalize(self._patent_query(self.query))
 
         # Remove all columns in the set difference
         patent_df = patent_df.drop(list(set(patent_df.columns) - set(self.patent_field_list)) + list(set(self.patent_field_list) - set(patent_df.columns)), axis=1)
