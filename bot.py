@@ -156,7 +156,7 @@ class Bot:
                 "type": "mrkdwn",
                 "text": (
                     '• :chart_with_upwards_trend: <https://docs.google.com/spreadsheets/d/'+research_link+'|research>\n'+
-                    '• :newspaper: <https://docs.google.com/spreadsheets/d/'+news_link+'|news>'
+                    '• :newspaper: <https://docs.google.com/spreadsheets/d/'+news_link+'|news>\n'
                     '• :closed_lock_with_key: <https://docs.google.com/spreadsheets/d/'+patent_link+'|patents>'
                 ),
             },
