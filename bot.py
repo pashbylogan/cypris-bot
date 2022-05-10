@@ -124,6 +124,8 @@ class Bot:
         'title',
         'abstraction',
         'documentType'
+        'categoryId',
+        'classificationText'
     ]
 
     paper_limit = os.environ['PAPER_LIMIT']
@@ -416,7 +418,9 @@ class Bot:
             'abstraction': 'Abstract',
             'title': 'Title',
             'inventor': 'Inventor',
-            'documentType': 'Is granted'
+            'documentType': 'Is granted',
+            'categoryId': 'Category',
+            'classificationText': 'Classification'
         })
         
         # Generate links
@@ -431,6 +435,8 @@ class Bot:
         patent_df['Inventor'] = patent_df['Inventor'].map(lambda x: '\n'.join(x))
         patent_df['Applicant'] = patent_df['Applicant'].map(lambda x: '\n'.join(x))
         patent_df['Is granted'] = patent_df['Is granted'].map(lambda x: 'YES' if not x else 'NO')
+        patent_df['Category'] = patent_df['Category'].map(lambda x: '\n'.join(x.split('; ')))
+        patent_df['Classification'] = patent_df['Classification'].map(lambda x: '\n'.join(x.split('; ')))
         
         # Find secondary keywords
         secondary_array = []
