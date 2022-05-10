@@ -123,7 +123,7 @@ class Bot:
         'assignee',
         'title',
         'abstraction',
-        'documentType'
+        'documentType',
         'categoryId',
         'classificationText'
     ]
