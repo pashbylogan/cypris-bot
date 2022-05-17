@@ -246,7 +246,7 @@ class Bot:
         query = query.replace(' and ', ' ')
         query = query.replace(' or ', ' ')
         words = query.split(' ')
-        words = '+'.join(words)
+        words = ' '.join(words)
         return words
     
     def _format_generic_query (self, query, secondary_keywords):
@@ -280,7 +280,6 @@ class Bot:
 
         # Parse semantic results
         semantic_pull = pd.json_normalize(self._semantic_query(self._format_semantic_query(self.query)))
-        print(semantic_pull)
         semantic_pull = semantic_pull.drop(['paperId'], axis = 1)
         semantic_pull['authors'] = semantic_pull['authors'].map(lambda x: [i['name'] for i in x])
         
