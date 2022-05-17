@@ -235,6 +235,19 @@ class Bot:
         q += " AND (" + " OR ".join(temp_array) + ")"
         q = f'({q})'
         return q
+
+    def _format_semantic_query (self, query):
+        """The semantic query structure as seen in the API docs.
+        NOTE - Boolean search is not an option at the time of writing.
+        """
+        query = query.lower()
+        query = query.replace(')', '')
+        query = query.replace('(', '')
+        query = query.replace(' and ', ' ')
+        query = query.replace(' or ', ' ')
+        words = query.split(' ')
+        words = '+'.join(words)
+        return words
     
     def _format_generic_query (self, query, secondary_keywords):
         """This adds secondary keywords to the original query.
@@ -266,7 +279,7 @@ class Bot:
         """
 
         # Parse semantic results
-        semantic_pull = pd.json_normalize(self._semantic_query(self._replace_ands_ors(self.query)))
+        semantic_pull = pd.json_normalize(self._semantic_query(self._format_semantic_query(self.query)))
         semantic_pull = semantic_pull.drop(['paperId'], axis = 1)
         semantic_pull['authors'] = semantic_pull['authors'].map(lambda x: [i['name'] for i in x])
         
