@@ -275,6 +275,7 @@ class Bot:
         core_pull = pd.json_normalize(self._core_query(self._format_core_query(self.query)))
         core_pull_filtered = core_pull[self.core_field_list].copy()
         core_pull_filtered['authors'] = core_pull_filtered['authors'].map(lambda x: [i['name'] for i in x])
+        core_pull_filtered['abstract'] = core_pull_filtered['abstract'].map(lambda x: re.sub('\s+',' ',x))
         core_pull_filtered.rename(columns={'downloadUrl': 'url', 'yearPublished': 'year'}, inplace=True)
         
         # Clean up
