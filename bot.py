@@ -210,7 +210,7 @@ class Bot:
 
         individual_words = parsed_q.split(' ')
         for word in individual_words:
-            q = q.replace(word, OS.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word))
+            q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word))
         
         q = f'({q})'
         return q
