@@ -200,15 +200,6 @@ class Bot:
         response = requests.get(self.core_url, params=params, headers=headers)
         return response.json()['results']
     
-    def _if_space (self, word):
-        """When a query word as a space, we want to treat that as a phrase.
-        NOTE - Currently not in use
-        """
-        if " " in word:
-            return f'((title: "{word}") OR (abstraction: "{word}"))'
-        else:
-            return f'((title: {word}) OR (abstraction: {word}))'
-    
     def _format_core_query (self, query):
         """The CORE query structure as seen in the backend code from the India team.
         """
@@ -219,7 +210,7 @@ class Bot:
 
         individual_words = parsed_q.split(' ')
         for word in individual_words:
-            q = q.replace(word, self._if_space(word))
+            q = q.replace(word, OS.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word))
         
         q = f'({q})'
         return q
@@ -237,23 +228,6 @@ class Bot:
         words = ' '.join(words)
         return words
     
-    def _format_generic_query (self, query, secondary_keywords):
-        """This adds secondary keywords to the original query.
-        NOTE - Currently not in use
-        """
-        q = query[1:len(query)-1] if query[0] == '(' and query[len(query)-1] == ')' else query
-        
-        temp_array = []
-        for i, word in enumerate(secondary_keywords):
-            if " " in word:
-                temp_array.append(f'"{word.lower()}"')
-            else:
-                temp_array.append(word.lower())
-    
-        q += " AND (" + " OR ".join(temp_array) + ")"
-        q = f'({q})'
-        return q
-
     def _replace_ands_ors(self, q):
         for s in ['or', 'Or', 'oR']:
             q = q.replace(s, 'OR')
