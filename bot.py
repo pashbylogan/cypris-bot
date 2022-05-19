@@ -205,9 +205,9 @@ class Bot:
         NOTE - Currently not in use
         """
         if " " in word:
-            return f'((title: "{word}") OR (abstract: "{word}"))'
+            return f'((title: "{word}") OR (abstraction: "{word}"))'
         else:
-            return f'((title: {word}) OR (abstract: {word}))'
+            return f'((title: {word}) OR (abstraction: {word}))'
     
     def _format_core_query (self, query):
         """The CORE query structure as seen in the backend code from the India team.
