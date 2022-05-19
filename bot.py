@@ -205,34 +205,22 @@ class Bot:
         NOTE - Currently not in use
         """
         if " " in word:
-            return f'((title: "{word}") OR (abstraction: "{word}"))'
+            return f'((title: "{word}") OR (abstract: "{word}"))'
         else:
-            return f'((title: {word}) OR (abstraction: {word}))'
+            return f'((title: {word}) OR (abstract: {word}))'
     
-    def _format_core_query (self, query, secondary_keywords):
+    def _format_core_query (self, query):
         """The CORE query structure as seen in the backend code from the India team.
-        NOTE - Currently not in use
         """
-        q = query[1:len(query)-1] if query[0] == '(' and query[len(query)-1] == ')' else query
+        q = self._replace_ands_ors(query)
+
+        parsed_q = q.replace(' AND ', ' ')
+        parsed_q = parsed_q.replace(' OR ', ' ')
+
+        individual_words = parsed_q.split(' ')
+        for word in individual_words:
+            q = q.replace(word, self._if_space(word))
         
-        andArr = []
-        for word in q.lower().split(' and '):
-            if ('or' in word.lower()):
-                orArr = []
-                word = word[1:len(word)-1] if word[0] == '(' and word[len(word)-1] == ')' else word
-                for w in word.lower().split(' or '):
-                    orArr.append(ifSpace(w))
-                word = "(" + " OR ".join(orArr) + ")"
-            else:
-                word = ifSpace(word)
-            andArr.append(word)
-        q = " AND ".join(andArr)
-        
-        temp_array = []
-        for i, word in enumerate(secondary_keywords):
-            temp_array.append(ifSpace(word))
-    
-        q += " AND (" + " OR ".join(temp_array) + ")"
         q = f'({q})'
         return q
 
@@ -269,7 +257,7 @@ class Bot:
     def _replace_ands_ors(self, q):
         for s in ['or', 'Or', 'oR']:
             q = q.replace(s, 'OR')
-        for s in ['and', 'And', 'aNd', 'anD', 'ANd', 'aND']:
+        for s in ['and', 'And', 'aNd', 'anD', 'ANd', 'aND', 'AnD']:
             q = q.replace(s, 'AND')
         return q
     
@@ -284,7 +272,7 @@ class Bot:
         semantic_pull['authors'] = semantic_pull['authors'].map(lambda x: [i['name'] for i in x])
         
         # Parse core results
-        core_pull = pd.json_normalize(self._core_query(self._replace_ands_ors(self.query)))
+        core_pull = pd.json_normalize(self._core_query(self._format_core_query(self.query)))
         core_pull_filtered = core_pull[self.core_field_list].copy()
         core_pull_filtered['authors'] = core_pull_filtered['authors'].map(lambda x: [i['name'] for i in x])
         core_pull_filtered.rename(columns={'downloadUrl': 'url', 'yearPublished': 'year'}, inplace=True)
