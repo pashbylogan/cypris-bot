@@ -127,12 +127,13 @@ def interact():
             # Handle a data submission request from the modal
             submitted_data = payload["view"]["state"]["values"]
             channel_id =  payload["response_urls"][0]["channel_id"]
+            secondary_keywords = []
 
             for key in submitted_data.keys():
                 obj = submitted_data[key]
                 if 'query' in list(obj.keys()):
                     query = obj['query']['value']
-                elif 'secondary' in list(obj.keys()):
+                elif 'secondary' in list(obj.keys()) and obj['secondary']['value']:
                     secondary_keywords = obj['secondary']['value'].split(',')
 
             # Simple message "Processing..." just to assure the user the task is working
