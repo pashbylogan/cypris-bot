@@ -45,6 +45,7 @@ def _send_modal(trigger_id):
 	    		"type": "input",
 	    		"element": {
 	    			"type": "plain_text_input",
+                    "optional": True,
 	    			"action_id": "secondary",
 	    			"placeholder": {
 	    				"type": "plain_text",
