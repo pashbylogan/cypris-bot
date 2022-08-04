@@ -213,10 +213,14 @@ class Bot:
 
         individual_words = []
         individual_words.extend(re.findall(r'"(.*?)"', parsed_q, re.DOTALL))
+        print('individual words 1', individual_words)
         for word in individual_words : parsed_q = parsed_q.replace(word, '')
+        print('parsed q 1', individual_words)
         individual_words.extend(parsed_q.split(' '))
+        print('individual words 2', individual_words)
+        q = q.replace('"', '')
         for word in individual_words:
-            q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word.replace('"', '')))
+            q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word))
         
         q = f'({q})'
         print('CORE QUERY', q)
