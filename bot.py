@@ -213,13 +213,13 @@ class Bot:
 
         individual_words = []
         individual_words.extend(re.findall(r'"(.*?)"', parsed_q, re.DOTALL))
-        for word in individual_words : parsed_q.replace(word, '')
-        individual_words = parsed_q.split(' ')
+        for word in individual_words : parsed_q = parsed_q.replace(word, '')
+        individual_words.extend(parsed_q.split(' '))
         for word in individual_words:
             q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word.replace('"', '')))
         
         q = f'({q})'
-        print(q)
+        print('CORE QUERY', q)
         return q
 
     def _format_semantic_query (self, query):
@@ -235,7 +235,7 @@ class Bot:
         query = re.sub('\s+',' ',query)
         words = query.split(' ')
         words = ' '.join(words)
-        print(words)
+        print('SEMANTIC QUERY', words)
         return words
     
     def _replace_ands_ors(self, q):
@@ -295,7 +295,7 @@ class Bot:
             'per_page': per_page,
         }
         data['published_at_start'] = ''.join(['NOW-', str(days_behind), 'DAYS'])
-        print(query)
+        print('NEWS QUERY', query)
         data['text'] = query
         if aql:
             data['aql'] = \
@@ -365,7 +365,7 @@ class Bot:
                 item = item.replace('-', ' ')
                 q[i] = item
             return q
-        print(util(q))
+        print('PATENTS QUERY', util(q))
 
         params = {
             "similarMatch":False,
