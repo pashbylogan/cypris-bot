@@ -267,9 +267,11 @@ class Bot:
             core_pull_filtered['authors'] = core_pull_filtered['authors'].map(lambda x: [i['name'] for i in x])
             core_pull_filtered['abstract'] = core_pull_filtered['abstract'].map(lambda x: re.sub('\s+',' ',str(x)))
             core_pull_filtered.rename(columns={'downloadUrl': 'url', 'yearPublished': 'year'}, inplace=True)
+            concat_frames = pd.concat([semantic_pull, core_pull_filtered])
+        else:
+            concat_frames = semantic_pull
         
         # Clean up
-        concat_frames = pd.concat([semantic_pull, core_pull_filtered])
         no_duplicates = concat_frames[~concat_frames.duplicated(subset='title', keep='first')]
         no_duplicates = no_duplicates.reset_index()
         no_duplicates = no_duplicates.drop(['index'], axis=1)
