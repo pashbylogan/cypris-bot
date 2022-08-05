@@ -211,23 +211,26 @@ class Bot:
         parsed_q = parsed_q.replace('(', '')
         parsed_q = re.sub('\s+',' ',parsed_q)
 
+        # Pull out phrases in quotation marks
         individual_words = []
         individual_words.extend(re.findall(r'"(.*?)"', parsed_q, re.DOTALL))
-        print('individual words 1', individual_words)
+
+        # Remove that phrase from the word list because we don't want to double count
         for word in individual_words : parsed_q = parsed_q.replace('"'+word+'"', '')
-        print('parsed q 1', parsed_q)
         individual_words.extend(parsed_q.split(' '))
+
+        # Remove non-words
         while("" in individual_words) : individual_words.remove("")
         while('""' in individual_words) : individual_words.remove("")
-        print('individual words 2', individual_words)
+
+        # Replace quotes because the template already has quotes in it
         q = q.replace('"', '')
-        print('RUNNING QUERY', q)
+
+        # Search for each word in the title or abstract
         for word in individual_words:
             q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word))
-            print('RUNNING QUERY', q)
         
         q = f'({q})'
-        print('CORE QUERY', q)
         return q
 
     def _format_semantic_query (self, query):
@@ -243,7 +246,6 @@ class Bot:
         query = re.sub('\s+',' ',query)
         words = query.split(' ')
         words = ' '.join(words)
-        print('SEMANTIC QUERY', words)
         return words
     
     def _replace_ands_ors(self, q):
@@ -265,7 +267,6 @@ class Bot:
         
         # Parse core results
         core_pull = pd.json_normalize(self._core_query(self._format_core_query(self.query)))
-        print('LENGTH', len(core_pull))
         if (len(core_pull) > 0):
             core_pull_filtered = core_pull[self.core_field_list].copy()
             core_pull_filtered['authors'] = core_pull_filtered['authors'].map(lambda x: [i['name'] for i in x])
@@ -308,7 +309,6 @@ class Bot:
         }
         data['published_at_start'] = ''.join(['NOW-', str(days_behind), 'DAYS'])
         data['text'] = self._replace_ands_ors(query)
-        print('NEWS QUERY', self._replace_ands_ors(query))
         if aql:
             data['aql'] = \
                 ''.join([
@@ -377,7 +377,6 @@ class Bot:
                 item = item.replace('-', ' ')
                 q[i] = item
             return q
-        print('PATENTS QUERY', util(q))
 
         params = {
             "similarMatch":False,
