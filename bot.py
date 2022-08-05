@@ -214,7 +214,7 @@ class Bot:
         individual_words = []
         individual_words.extend(re.findall(r'"(.*?)"', parsed_q, re.DOTALL))
         print('individual words 1', individual_words)
-        for word in individual_words : parsed_q = parsed_q.replace(word, '')
+        for word in individual_words : parsed_q = parsed_q.replace('"'+word+'"', '')
         print('parsed q 1', parsed_q)
         individual_words.extend(parsed_q.split(' '))
         print('individual words 2', individual_words)
@@ -261,10 +261,12 @@ class Bot:
         
         # Parse core results
         core_pull = pd.json_normalize(self._core_query(self._format_core_query(self.query)))
-        core_pull_filtered = core_pull[self.core_field_list].copy()
-        core_pull_filtered['authors'] = core_pull_filtered['authors'].map(lambda x: [i['name'] for i in x])
-        core_pull_filtered['abstract'] = core_pull_filtered['abstract'].map(lambda x: re.sub('\s+',' ',str(x)))
-        core_pull_filtered.rename(columns={'downloadUrl': 'url', 'yearPublished': 'year'}, inplace=True)
+        print('LENGTH', len(core_pull))
+        if (len(core_pull) > 0):
+            core_pull_filtered = core_pull[self.core_field_list].copy()
+            core_pull_filtered['authors'] = core_pull_filtered['authors'].map(lambda x: [i['name'] for i in x])
+            core_pull_filtered['abstract'] = core_pull_filtered['abstract'].map(lambda x: re.sub('\s+',' ',str(x)))
+            core_pull_filtered.rename(columns={'downloadUrl': 'url', 'yearPublished': 'year'}, inplace=True)
         
         # Clean up
         concat_frames = pd.concat([semantic_pull, core_pull_filtered])
