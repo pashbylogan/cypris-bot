@@ -221,8 +221,10 @@ class Bot:
         individual_words.remove('""') if '""' in individual_words else None
         print('individual words 2', individual_words)
         q = q.replace('"', '')
+        print('RUNNING QUERY', q)
         for word in individual_words:
             q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word))
+            print('RUNNING QUERY', q)
         
         q = f'({q})'
         print('CORE QUERY', q)
