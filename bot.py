@@ -411,46 +411,46 @@ class Bot:
         if len(patent_df) > 0:
             patent_df = patent_df.drop(list(set(patent_df.columns) - set(self.patent_field_list)) + list(set(self.patent_field_list) - set(patent_df.columns)), axis=1)
 
-        # Rename columns to make more readible
-        patent_df = patent_df.rename(columns={
-            'country': 'Country Name',
-            'patentNumber': 'Publication',
-            'publicationDate': 'Publication Date',
-            'assignee': 'Applicant',
-            'abstraction': 'Abstract',
-            'title': 'Title',
-            'inventor': 'Inventor',
-            'documentType': 'Is granted',
-            'categoryId': 'Category',
-            'classificationText': 'Classification'
-        })
-        
-        # Generate links
-        link_row = []
-        link = 'https://worldwide.espacenet.com/patent/search/publication/'
-        for idx, row in patent_df.iterrows():
-            link_row.append(f'{link}{row.Publication}')
-        patent_df['url'] = link_row
-        
-        # Clean up data
-        patent_df['Country Name'] = patent_df['Country Name'].map(lambda x: (pycountry.countries.get(alpha_2=x).name if pycountry.countries.get(alpha_2=x) != None else ''))
-        patent_df['Inventor'] = patent_df['Inventor'].map(lambda x: '\n'.join(x))
-        patent_df['Applicant'] = patent_df['Applicant'].map(lambda x: '\n'.join(x))
-        patent_df['Is granted'] = patent_df['Is granted'].map(lambda x: 'YES' if not x else 'NO')
-        patent_df['Category'] = patent_df['Category'].map(lambda x: '\n'.join(x.split('; ')))
-        patent_df['Classification'] = patent_df['Classification'].map(lambda x: '\n'.join(x.split('; ')))
-        
-        # Find secondary keywords
-        secondary_array = []
-        for index, row in patent_df.iterrows():
-            temp = []
-            for word in self.secondary_keywords:
-                title = '' if not row['Title'] else row['Title'].lower()
-                abstract = '' if not row['Abstract'] else row['Abstract'].lower()
-                if word.lower() in title or word.lower() in abstract:
-                    temp.append(word.lower())
-            secondary_array.append(temp)
-        patent_df['secondary'] = secondary_array
+            # Rename columns to make more readible
+            patent_df = patent_df.rename(columns={
+                'country': 'Country Name',
+                'patentNumber': 'Publication',
+                'publicationDate': 'Publication Date',
+                'assignee': 'Applicant',
+                'abstraction': 'Abstract',
+                'title': 'Title',
+                'inventor': 'Inventor',
+                'documentType': 'Is granted',
+                'categoryId': 'Category',
+                'classificationText': 'Classification'
+            })
+            
+            # Generate links
+            link_row = []
+            link = 'https://worldwide.espacenet.com/patent/search/publication/'
+            for idx, row in patent_df.iterrows():
+                link_row.append(f'{link}{row.Publication}')
+            patent_df['url'] = link_row
+            
+            # Clean up data
+            patent_df['Country Name'] = patent_df['Country Name'].map(lambda x: (pycountry.countries.get(alpha_2=x).name if pycountry.countries.get(alpha_2=x) != None else ''))
+            patent_df['Inventor'] = patent_df['Inventor'].map(lambda x: '\n'.join(x))
+            patent_df['Applicant'] = patent_df['Applicant'].map(lambda x: '\n'.join(x))
+            patent_df['Is granted'] = patent_df['Is granted'].map(lambda x: 'YES' if not x else 'NO')
+            patent_df['Category'] = patent_df['Category'].map(lambda x: '\n'.join(x.split('; ')))
+            patent_df['Classification'] = patent_df['Classification'].map(lambda x: '\n'.join(x.split('; ')))
+            
+            # Find secondary keywords
+            secondary_array = []
+            for index, row in patent_df.iterrows():
+                temp = []
+                for word in self.secondary_keywords:
+                    title = '' if not row['Title'] else row['Title'].lower()
+                    abstract = '' if not row['Abstract'] else row['Abstract'].lower()
+                    if word.lower() in title or word.lower() in abstract:
+                        temp.append(word.lower())
+                secondary_array.append(temp)
+            patent_df['secondary'] = secondary_array
 
         return patent_df
 
