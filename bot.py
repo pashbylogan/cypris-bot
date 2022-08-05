@@ -217,6 +217,8 @@ class Bot:
         for word in individual_words : parsed_q = parsed_q.replace('"'+word+'"', '')
         print('parsed q 1', parsed_q)
         individual_words.extend(parsed_q.split(' '))
+        individual_words.remove('')
+        individual_words.remove('""')
         print('individual words 2', individual_words)
         q = q.replace('"', '')
         for word in individual_words:
