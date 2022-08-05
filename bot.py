@@ -307,8 +307,8 @@ class Bot:
             'per_page': per_page,
         }
         data['published_at_start'] = ''.join(['NOW-', str(days_behind), 'DAYS'])
-        print('NEWS QUERY', query)
-        data['text'] = query
+        data['text'] = self._replace_ands_ors(query)
+        print('NEWS QUERY', self._replace_ands_ors(query))
         if aql:
             data['aql'] = \
                 ''.join([
@@ -408,7 +408,8 @@ class Bot:
         patent_df = pd.json_normalize(self._patent_query(self.query))
 
         # Remove all columns in the set difference
-        patent_df = patent_df.drop(list(set(patent_df.columns) - set(self.patent_field_list)) + list(set(self.patent_field_list) - set(patent_df.columns)), axis=1)
+        if len(patent_df) > 0:
+            patent_df = patent_df.drop(list(set(patent_df.columns) - set(self.patent_field_list)) + list(set(self.patent_field_list) - set(patent_df.columns)), axis=1)
 
         # Rename columns to make more readible
         patent_df = patent_df.rename(columns={
