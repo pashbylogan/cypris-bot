@@ -215,7 +215,7 @@ class Bot:
         individual_words.extend(re.findall(r'"(.*?)"', parsed_q, re.DOTALL))
         print('individual words 1', individual_words)
         for word in individual_words : parsed_q = parsed_q.replace(word, '')
-        print('parsed q 1', individual_words)
+        print('parsed q 1', parsed_q)
         individual_words.extend(parsed_q.split(' '))
         print('individual words 2', individual_words)
         q = q.replace('"', '')
