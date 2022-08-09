@@ -231,6 +231,7 @@ class Bot:
             q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word))
         
         q = f'({q})'
+        print('CORE QUERY', q)
         return q
 
     def _format_semantic_query (self, query):
@@ -246,6 +247,7 @@ class Bot:
         query = re.sub('\s+',' ',query)
         words = query.split(' ')
         words = ' '.join(words)
+        print('SEMANTIC QUERY', words)
         return words
     
     def _replace_ands_ors(self, q):
@@ -378,6 +380,8 @@ class Bot:
                 item = item.replace('-', ' ')
                 q[i] = item
             return q
+
+        print('PATENT QUERY', util(q))
 
         params = {
             "similarMatch":False,
