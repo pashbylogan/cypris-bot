@@ -262,8 +262,9 @@ class Bot:
 
         # Parse semantic results
         semantic_pull = pd.json_normalize(self._semantic_query(self._format_semantic_query(self.query)))
-        semantic_pull = semantic_pull.drop(['paperId'], axis = 1)
-        semantic_pull['authors'] = semantic_pull['authors'].map(lambda x: [i['name'] for i in x])
+        if len(semantic_pull)> 0:
+            semantic_pull = semantic_pull.drop(['paperId'], axis = 1)
+            semantic_pull['authors'] = semantic_pull['authors'].map(lambda x: [i['name'] for i in x])
         
         # Parse core results
         core_pull = pd.json_normalize(self._core_query(self._format_core_query(self.query)))
