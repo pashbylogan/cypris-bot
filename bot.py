@@ -228,7 +228,7 @@ class Bot:
 
         # Search for each word in the title or abstract
         for word in individual_words:
-            q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word))
+            q = q.replace(word, os.environ['CORE_TEMPLATE_EXACT'].replace('KEYWORD', word, 1))
         
         q = f'({q})'
         print('CORE QUERY', q)
