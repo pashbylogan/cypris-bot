@@ -187,6 +187,8 @@ class Bot:
 
         if response.status_code == 200:
             return response.json()['data']
+        else:
+            print(f'Status code is {response.status_code}')
     
     def _core_query (self, q):
         """Query core API.
@@ -203,6 +205,8 @@ class Bot:
 
         if response.status_code == 200:
             return response.json()['results']
+        else:
+            print(f'Status code is {response.status_code}')
     
     def _format_core_query (self, query):
         """The CORE query structure as seen in the backend code from the India team.
@@ -420,14 +424,23 @@ class Bot:
             "sorted":False
         }
         response = requests.post("".join([self.cypris_url, '?resultSize=', str(self.patent_limit), '&offSet=0']), json=params)
-        return response.json()['patents']
+
+        if response.status_code == 200:
+            return response.json()['patents']
+        else:
+            print(f'Status code is {response.status_code}')
         
     def get_patents(self):
         """ Pull patents from cypris dev and turn them into pandas dataframe
         """
 
         # Parse patent results
-        patent_df = pd.json_normalize(self._patent_query(self.query))
+        patent_results = self._patent_query(self.query)
+
+        if patent_results:
+            patent_df = pd.json_normalize(patent_results)
+        else:
+            patent_df = pd.DataFrame()
 
         # Remove all columns in the set difference
         if len(patent_df) > 0:
