@@ -184,6 +184,7 @@ class Bot:
             'Authorization': self.semantic_key
         }
         response = requests.get(self.semantic_url, params=params, headers=headers)
+        print(response)
         return response.json()['data']
     
     def _core_query (self, q):
