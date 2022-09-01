@@ -188,7 +188,7 @@ class Bot:
         if response.status_code == 200:
             return response.json()['data']
         else:
-            print(f'Status code is {response.status_code}')
+            print(f'Semantic failed with status code: {response.status_code}')
     
     def _core_query (self, q):
         """Query core API.
@@ -206,7 +206,7 @@ class Bot:
         if response.status_code == 200:
             return response.json()['results']
         else:
-            print(f'Status code is {response.status_code}')
+            print(f'Core failed with status code: {response.status_code}')
     
     def _format_core_query (self, query):
         """The CORE query structure as seen in the backend code from the India team.
@@ -276,7 +276,6 @@ class Bot:
         if semantic_results:
             semantic_pull = pd.json_normalize(semantic_results)
         else:
-            print('made it here SEMANTIC')
             semantic_pull = pd.DataFrame()
 
         if len(semantic_pull)> 0:
@@ -289,7 +288,6 @@ class Bot:
         if core_results:
             core_pull = pd.json_normalize(core_results)
         else:
-            print('made it here CORE')
             core_pull = pd.DataFrame()
 
         if (len(core_pull) > 0):
@@ -428,7 +426,7 @@ class Bot:
         if response.status_code == 200:
             return response.json()['patents']
         else:
-            print(f'Status code is {response.status_code}')
+            print(f'Patents failed with status code: {response.status_code}')
         
     def get_patents(self):
         """ Pull patents from cypris dev and turn them into pandas dataframe
