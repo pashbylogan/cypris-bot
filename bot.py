@@ -184,7 +184,6 @@ class Bot:
             'Authorization': self.semantic_key
         }
         response = requests.get(self.semantic_url, params=params, headers=headers)
-        print(response)
         return response.json()['data']
     
     def _core_query (self, q):
@@ -264,7 +263,8 @@ class Bot:
         """
 
         # Parse semantic results
-        semantic_pull = pd.json_normalize(self._semantic_query(self._format_semantic_query(self.query)))
+        # semantic_pull = pd.json_normalize(self._semantic_query(self._format_semantic_query(self.query)))
+        semantic_pull = pd.DataFrame()
         if len(semantic_pull)> 0:
             semantic_pull = semantic_pull.drop(['paperId'], axis = 1)
             semantic_pull['authors'] = semantic_pull['authors'].map(lambda x: [i['name'] for i in x])
