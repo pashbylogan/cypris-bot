@@ -184,7 +184,9 @@ class Bot:
             'Authorization': self.semantic_key
         }
         response = requests.get(self.semantic_url, params=params, headers=headers)
-        return response.json()['data']
+
+        if response.status_code == 200:
+            return response.json()['data']
     
     def _core_query (self, q):
         """Query core API.
@@ -198,7 +200,9 @@ class Bot:
         headers={"Authorization":"Bearer "+self.core_key}
         
         response = requests.get(self.core_url, params=params, headers=headers)
-        return response.json()['results']
+
+        if response.status_code == 200:
+            return response.json()['results']
     
     def _format_core_query (self, query):
         """The CORE query structure as seen in the backend code from the India team.
@@ -263,14 +267,27 @@ class Bot:
         """
 
         # Parse semantic results
-        # semantic_pull = pd.json_normalize(self._semantic_query(self._format_semantic_query(self.query)))
-        semantic_pull = pd.DataFrame()
+        semantic_results = self._semantic_query(self._format_semantic_query(self.query))
+
+        if semantic_results:
+            semantic_pull = pd.json_normalize(semantic_results)
+        else:
+            print('made it here SEMANTIC')
+            semantic_pull = pd.DataFrame()
+
         if len(semantic_pull)> 0:
             semantic_pull = semantic_pull.drop(['paperId'], axis = 1)
             semantic_pull['authors'] = semantic_pull['authors'].map(lambda x: [i['name'] for i in x])
         
         # Parse core results
-        core_pull = pd.json_normalize(self._core_query(self._format_core_query(self.query)))
+        core_results = self._core_query(self._format_core_query(self.query))
+
+        if core_results:
+            core_pull = pd.json_normalize(core_results)
+        else:
+            print('made it here CORE')
+            core_pull = pd.DataFrame()
+
         if (len(core_pull) > 0):
             core_pull_filtered = core_pull[self.core_field_list].copy()
             core_pull_filtered['authors'] = core_pull_filtered['authors'].map(lambda x: [i['name'] for i in x])
