@@ -185,6 +185,7 @@ class Bot:
         }
         response = requests.get(self.semantic_url, params=params, headers=headers)
 
+        print('semantic response', response)
         if response.status_code == 200:
             return response.json()['data']
         else:
