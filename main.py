@@ -148,3 +148,7 @@ def interact():
 
     # If we make it here, an error occured
     return make_response("", 500)
+
+@app.route('/', methods=['GET'])
+def index():
+    return make_response("I'm working!", 200)
